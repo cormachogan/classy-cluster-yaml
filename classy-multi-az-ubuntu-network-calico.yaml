@@ -1,0 +1,94 @@
+apiVersion: cni.tanzu.vmware.com/v1alpha1
+kind: CalicoConfig
+metadata:
+  name: classy-ub-05
+  namespace: cormac-ns
+spec:
+  calico:
+    config:
+      vethMTU: 0
+
+---
+
+apiVersion: run.tanzu.vmware.com/v1alpha3
+kind: KappControllerConfig
+metadata:
+  name: classy-ub-05
+  namespace: cormac-ns
+spec:
+  namespace: tkg-system
+
+---
+
+apiVersion: run.tanzu.vmware.com/v1alpha3
+kind: ClusterBootstrap
+metadata:
+  annotations:
+    tkg.tanzu.vmware.com/add-missing-fields-from-tkr: v1.23.8---vmware.2-tkg.2-zshippable
+  name: classy-ub-05
+  namespace: cormac-ns
+spec:
+  cni:
+    refName: calico*
+    valuesFrom:
+      providerRef:
+        apiGroup: cni.tanzu.vmware.com
+        kind: CalicoConfig
+        name: classy-ub-05
+  kapp:
+    refName: kapp-controller*
+    valuesFrom:
+      providerRef:
+        apiGroup: run.tanzu.vmware.com
+        kind: KappControllerConfig
+        name: classy-ub-05
+
+---
+
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: classy-ub-05
+  namespace: cormac-ns
+spec:
+  clusterNetwork:
+    services:
+      cidrBlocks: ["198.58.0.0/12"]
+    pods:
+      cidrBlocks: ["192.51.0.0/16"]
+  topology:
+    class: tanzukubernetescluster
+    version: v1.23.8---vmware.2-tkg.2-zshippable
+    controlPlane:
+      metadata:
+        annotations:
+          run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
+      replicas: 3
+    workers:
+      machineDeployments:
+        - class: node-pool
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
+          failureDomain: zone-1
+          name: node-pool-1
+          replicas: 1
+        - class: node-pool
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
+          failureDomain: zone-2
+          name: node-pool-2
+          replicas: 1
+        - class: node-pool
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
+          failureDomain: zone-3
+          name: node-pool-3
+          replicas: 1
+    variables:
+      - name: vmClass
+        value: guaranteed-small
+      - name: storageClass
+        value: multi-az-storage-policy
