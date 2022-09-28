@@ -1,0 +1,43 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: classy-ub-07g
+  namespace: cormac-ns
+spec:
+  clusterNetwork:
+    services:
+      cidrBlocks: ["198.80.0.0/12"]
+    pods:
+      cidrBlocks: ["192.72.0.0/16"]
+  topology:
+    class: tanzukubernetescluster
+    version: v1.23.8---vmware.2-tkg.2-zshippable
+    controlPlane:
+      replicas: 1
+    workers:
+      machineDeployments:
+        - class: node-pool
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
+          name: node-pool-7
+          replicas: 2
+          variables:
+            overrides:
+            - name: vmClass
+              value: guaranteed-medium
+        - class: node-pool
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
+          name: node-pool-8
+          replicas: 2
+          variables:
+            overrides:
+            - name: vmClass
+              value: guaranteed-medium
+    variables:
+      - name: vmClass
+        value: guaranteed-small
+      - name: storageClass
+        value: vsan-default-storage-policy
