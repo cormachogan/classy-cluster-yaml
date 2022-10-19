@@ -1,0 +1,53 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: cluster-pvs
+  namespace: cormac-ns
+spec:
+  clusterNetwork:
+    services:
+      cidrBlocks: ["198.51.100.0/12"]
+    pods:
+      cidrBlocks: ["192.0.2.0/16"]
+    serviceDomain: "cluster.local"
+  topology:
+    class: tanzukubernetescluster
+    version: v1.23.8+vmware.2-tkg.2-zshippable
+    controlPlane:
+      replicas: 1
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: node-pool-1
+          failureDomain: zone-1
+          replicas: 1
+          variables:
+            overrides:
+            - name: vmClass
+              value: guaranteed-small
+    variables:
+      - name: vmClass
+        value: guaranteed-small
+      - name: storageClass
+        value: multi-az
+      - name: defaultStorageClass
+        value: multi-az
+      - name: controlPlaneVolumes
+        value:
+          - name: etcd
+            capacity:
+              storage: 4Gi
+            mountPath: /var/lib/etcd
+            storageClass: multi-az
+      - name: nodePoolVolumes
+        value:
+          - name: containerd
+            capacity:
+              storage: 50Gi
+            mountPath: /var/lib/containerd
+            storageClass: multi-az
+          - name: kubelet
+            capacity:
+              storage: 50Gi
+            mountPath: /var/lib/kubelet
+            storageClass: multi-az
