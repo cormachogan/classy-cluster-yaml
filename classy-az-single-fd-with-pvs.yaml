@@ -1,4 +1,4 @@
-# Cluster with volumes on worker nodes
+# Cluster deployed to single AZ in multi-AZ setup, with large volumes on worker nodes
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
