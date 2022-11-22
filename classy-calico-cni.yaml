@@ -1,3 +1,4 @@
+# Swapping the default Antrea CNI for a Calico CNI
 # Note that the various configs and the ClusterBootstrap name match the name of the cluster
 apiVersion: cni.tanzu.vmware.com/v1alpha1
 kind: CalicoConfig
