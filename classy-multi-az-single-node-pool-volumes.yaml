@@ -1,0 +1,53 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: class-03
+  namespace: cormac-ns
+spec:
+  clusterNetwork:
+    services:
+      cidrBlocks: ["198.51.100.0/12"]
+    pods:
+      cidrBlocks: ["192.0.2.0/16"]
+    serviceDomain: "rainpole.com"
+  topology:
+    class: tanzukubernetescluster
+    version: v1.23.8---vmware.2-tkg.2-zshippable
+    controlPlane:
+      metadata:
+        annotations:
+      replicas: 1
+    workers:
+      # node pools
+      machineDeployments:
+      - class: node-pool
+        name: node-pool-1
+        replicas: 1
+        failureDomain: zone-1
+        variables:
+          overrides:
+            - name: vmClass
+              value: best-effort-medium
+            - name: nodePoolVolumes
+              value:
+                  - name: kubelet
+                    mountPath: /var/lib/kubelet
+                    storageClass: multi-az
+                    capacity:
+                      storage: 50Gi
+      - class: node-pool
+        name: node-pool-2
+        replicas: 1
+        failureDomain: zone-2
+      - class: node-pool
+        name: node-pool-3
+        replicas: 1
+        failureDomain: zone-3
+    variables:
+    - name: vmClass
+      value: best-effort-small
+      # default storageclass for control plane and node pool
+    - name: storageClass
+      value: "multi-az"
+    - name: nodePoolVolumes
+      value: []
