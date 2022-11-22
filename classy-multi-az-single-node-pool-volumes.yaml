@@ -1,3 +1,4 @@
+# Multi-AZ cluster with volumes on some node pools and not others
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
@@ -43,6 +44,7 @@ spec:
         name: node-pool-3
         replicas: 1
         failureDomain: zone-3
+    # whatever you override must be declared in the cluster variables section, even if empty, e.g. nodePoolVolumes
     variables:
     - name: vmClass
       value: best-effort-small
